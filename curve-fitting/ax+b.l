@@ -14,7 +14,7 @@
 (setq Population
   (make
     (do 10
-      (link (list (rand -10.0 10.0) (rand -10.0 10.0))))) )
+      (link (list (- (rand 0 20.0) 10.0) (- (rand 0 20.0) 10.0))))) )
 
 (de termination (A)
   (let (M (maxi fitness A) F @@ R (function M) )
@@ -35,7 +35,7 @@
 
 (de mutate (A)
   (if (=0 (rand 0 10))
-    (+ A (rand -2.0 2.0))
+    (+ A (- (rand 0 4.0) 2.0))
     A) )
 (de mutation (A)
   (mapcar mutate A) )
