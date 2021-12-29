@@ -1,0 +1,12 @@
+                                                      Recieves 
+                                                  ┏━━━━━━━━━━━━━━┓
+                                             cdr,cddr,...   car,cadr,...
+                                           ╔══════════════╦══════════════╗
+        ┏ last result                      ║ map          ║ mapc         ║ 
+        ┃                                  ╠══════════════╬══════════════╣
+Returns ┣ list of all results              ║ maplist      ║ mapcar       ║ 
+        ┃                                  ╠══════════════╬══════════════╣
+        ┗ list of all results concatinated ║ mapcon       ║ mapcan       ║
+                                           ╚══════════════╩══════════════╝
+
+Made By Hunar :)
