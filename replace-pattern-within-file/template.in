@@ -1,0 +1,12 @@
+# Part of an input example for Quantum Espresso
+&system
+	degauss = 0.0001
+	ecutrho	= 700
+	ecutwfc	= 70
+	ibrav	= 0
+	nat	= <Atoms>
+	nspin	= 1
+	ntyp	= <Types>
+	occupations = "smearing"
+	smearing    = "gaussian"
+/
