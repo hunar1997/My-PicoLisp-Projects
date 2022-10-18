@@ -31,4 +31,6 @@
 (scl 27)
 (test2 (python pow (4 . 10) 33) 0.000000000000078697629483834)
 
+(test2 (python '("-" join) ("a" "b" "c")) "a-b-c")
+
 (bye)

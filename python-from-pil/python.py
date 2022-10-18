@@ -4,11 +4,12 @@ def line_split(line):
         return re.findall(r'[^"\s]\S*|".+?"', line) # magic from the internet
 
 def to_lisp(L,initial="'"):
-    if type(L)==list:
+    tp = type(L)
+    if tp==list:
         return initial + "(" + " ".join([to_lisp(i,"") for i in L]) + ")"
-    elif type(L)==str:
+    elif tp==str:
         return "\"" + L + "\""
-    elif type(L)==float and "e" in str(L):
+    elif tp==float and "e" in str(L):
         s = str(L)
         e = s.find("e")
         a = s[:e].replace(".","")
@@ -35,7 +36,8 @@ if code[0]!="'":
     removes.reverse()
     for v in removes:
         code.pop(v)
-    res = eval( f"{code[0]}({', '.join(code[1:]) })" )
+    params = ', '.join(code[1:]).replace("'","")
+    res = eval( f"{code[0]}({params})" )
     print( to_lisp(res) )
 else:
     end=0
@@ -49,7 +51,7 @@ else:
             code = code[:i]+","+code[i+1:]
     
     dots = ".".join(line_split(code[2:end]))
-    dots = dots.replace("(","[").replace(")","]")
-    params = ", ".join(line_split(code[end+1:]))
+    dots = dots.replace("(","[").replace(")","]").replace("'","")
+    params = ", ".join(line_split(code[end+1:])).replace("'","")
     res = eval(f"{dots}({params})")
     print( to_lisp(res) )
