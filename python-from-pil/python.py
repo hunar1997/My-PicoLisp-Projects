@@ -31,10 +31,18 @@ if code[0]!="'":
         code.pop(v)
     print(eval( f"{code[0]}({', '.join(code[1:]) })" ))
 else:
-    end=code.find(')')
+    end=0
+    for i,v in enumerate(code):
+        if v=="(": end+=1
+        if v==")": end-=1
+        if i>1 and end==0:
+            end=i
+            break
+        if v==" " and end>1:
+            code = code[:i]+","+code[i+1:]
+    
     dots = ".".join(line_split(code[2:end]))
+    dots = dots.replace("(","[").replace(")","]")
     params = ", ".join(line_split(code[end+1:]))
-    res = eval(f"{from_lisp(dots)}({from_lisp(params)})")
+    res = eval(f"{dots}({params})")
     print( to_lisp(res) )
-
-
