@@ -17,7 +17,18 @@ def from_lisp(L):
 
 code = input()[1:-1]
 if code[0]!="'":
-    code=code.split()
+    code=code.replace("(","[").replace(")","]").replace(".","'.'").split()
+    removes=[]
+    for i,v in enumerate(code):
+        if v=="'.'":
+            a = int(code[i-1][1:])
+            b = int(code[i+1][:-1])
+            code[i-1]=str(a/b)
+            removes.append(i)
+            removes.append(i+1)
+    removes.reverse()
+    for v in removes:
+        code.pop(v)
     print(eval( f"{code[0]}({', '.join(code[1:]) })" ))
 else:
     end=code.find(')')
