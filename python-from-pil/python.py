@@ -8,12 +8,18 @@ def to_lisp(L,initial="'"):
         return initial + "(" + " ".join([to_lisp(i,"") for i in L]) + ")"
     elif type(L)==str:
         return "\"" + L + "\""
+    elif type(L)==float and "e" in str(L):
+        s = str(L)
+        e = s.find("e")
+        a = s[:e].replace(".","")
+        b = int(s[e+1:])
+        if b>0:
+            return a.ljust(2*b-len(a), "0")
+        else:
+
+            return "0." + a[2:].rjust(len(a)+abs(b)-3,"0")
     else:
         return L
-    # todo: integer is fine, but float maybe scientific noation
-
-def from_lisp(L):
-    return L
 
 code = input()[1:-1]
 if code[0]!="'":
@@ -29,7 +35,8 @@ if code[0]!="'":
     removes.reverse()
     for v in removes:
         code.pop(v)
-    print(eval( f"{code[0]}({', '.join(code[1:]) })" ))
+    res = eval( f"{code[0]}({', '.join(code[1:]) })" )
+    print( to_lisp(res) )
 else:
     end=0
     for i,v in enumerate(code):
