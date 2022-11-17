@@ -17,6 +17,9 @@
 (de m* (A B)
    (mmap '((A B) (*/ A B 1.)) A B))
 
+(de m*N (A N)
+   (mmap '((A) (*/ A N 1.)) A))
+
 (de m+ (A B)
    (mmap + A B))
 
@@ -34,19 +37,19 @@
       (prin "   ")
       (for J (mapcar round I)
          (prin J " "))
-	  (prinl)))
+     (prinl)))
 
 (de relu (N)
-	(max N 0))
+   (max N 0))
 
 (de sig (N)
    (*/ 1. 1. (+ 1. (exp (- N)))) )
 
 (de sigInv (N)
-   (*/ (sig N) (- 1. (sig N)) 1.))
+   (*/ N (- 1. N) 1.))
 
 (de reluInv (N)
-	(if (ge0 N) 1.0 0))
+   (if (ge0 N) 1.0 0))
 
 (de mActivate (M)
    (mmap sig M))
@@ -93,8 +96,16 @@
 
 # Feed forwarding done
 
-(setq *ErrorO
+(setq *LR 0.1) # Learning Rate
+
+(setq *Diff
    (m- *Output (car *Layers)) )
+
+(setq *Error
+   (mmap '((X) (pow X 2.0)) *Diff))
+
+(setq *dS_dL # The learning rate is applied once, i'll do it here
+   (m*N (mActivateInv (car *Layers)) *LR)) 
 
 (setq *DeltaO
    (m* *ErrorO
