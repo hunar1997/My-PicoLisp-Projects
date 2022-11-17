@@ -2,32 +2,31 @@
 
 (seed "test2")
 
-(de m* (A B)
+(de mDot (A B)
    (mapcar
       '((X)
          (apply mapcar B '(@ (sum '((A B) (*/ A B 1.0)) (rest) X))) )
       A ) )
 
-(de m*e (A B)
-	(mapcar '((A B)
-	   (mapcar '((A B)
-	               (*/ A B 1.)) A B))
-	            A B))
+(de mmap (F A B)
+   (mapcar '((A B)
+      (mapcar '((A B)
+                  (F A B) ) A B))
+               A B))
+
+(de m* (A B)
+   (mmap '((A B) (*/ A B 1.)) A B))
 
 (de m+ (A B)
-	(mapcar '((A B)
-	   (mapcar + A B))
-	   A B))
+   (mmap + A B))
 
 (de m- (A B)
-	(mapcar '((A B)
-	   (mapcar - A B))
-	   A B))
+   (mmap - A B))
 
 (de mRand (A B)
    (make (do A
       (link (make (do B
-	     (link (- (rand 0 2.0) 1.0]
+        (link (- (rand 0 2.0) 1.0]
 
 (de mPrint (M)
    (prinl)
@@ -50,23 +49,23 @@
 	(if (ge0 N) 1.0 0))
 
 (de mActivate (M)
-   (mapcar '((N) (mapcar sig N)) M) )
+   (mmap sig M))
 
 (de mActivateInv (M)
-   (mapcar '((N) (mapcar sigInv N)) M) )
+   (mmap sigInv M))
 
 (de addBias (M B)
    (mapcar '((I) (mapcar + I B)) M) )
 
 (setq *Inputs '((0.0 0.0)
                (0.0 1.0)
-			   (1.0 0.0)
-			   (1.0 1.0)) )
+               (1.0 0.0)
+               (1.0 1.0)) )
 
 (setq *Output '((0.0)
-			    (1.0)
-				(1.0)
-				(0.0)) )
+                (1.0)
+                (1.0)
+                (0.0)) )
 
 (setq *Network '(2 2 1))
 
@@ -77,18 +76,18 @@
 (setq *Biases (make
    (for I (cdr *Network)
       (link (make (do I
-	     (link (- (rand 0 2.0) 1.0]
+        (link (- (rand 0 2.0) 1.0]
 
 (setq *Layers (list *Inputs))
 
 (mapcar
    '((W B)
       (setq *Layers
-	     (append (list (mActivate
-	       (addBias
-		       (m* (car *Layers) W)
-	           B)))
-		   *Layers))) 
+        (append (list (mActivate
+          (addBias
+             (mDot (car *Layers) W)
+              B)))
+         *Layers))) 
    *Weights
    *Biases)
 
@@ -98,5 +97,5 @@
    (m- *Output (car *Layers)) )
 
 (setq *DeltaO
-   (m*e *ErrorO
+   (m* *ErrorO
         (mActivateInv (car *Layers)) ))
