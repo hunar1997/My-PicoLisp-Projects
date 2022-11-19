@@ -8,6 +8,15 @@
          (apply mapcar B '(@ (sum '((A B) (*/ A B 1.0)) (rest) X))) )
       A ) )
 
+(de mT (M)
+   (apply mapcar M list))
+
+(de mSumRow (M)
+   (mapcar '((M) (apply + M)) M))
+
+(de mSumCol (M)
+   (apply mapcar M +))
+
 (de mmap (F A B)
    (mapcar '((A B)
       (mapcar '((A B)
@@ -104,9 +113,30 @@
 (setq *Error
    (mmap '((X) (pow X 2.0)) *Diff))
 
-(setq *dS_dL # The learning rate is applied once, i'll do it here
-   (m*N (mActivateInv (car *Layers)) *LR)) 
+(setq *dE_dL # The learning rate is applied once, i'll do it here
+   (m* *Diff (m*N (mActivateInv (car *Layers)) *LR)) )
 
 (setq *DeltaO
-   (m* *ErrorO
-        (mActivateInv (car *Layers)) ))
+   (mDot (mT (cadr *Layers)) *dE_dL) )
+
+(setq *DeltaBO
+   (mSumCol *dE_dL)) 
+
+(setq *ErrorH
+   (mDot
+      *dE_dL
+      (mT (cadr *Weights)) ))
+
+(setq *dE_dH
+   (m*
+      *ErrorH
+      (mActivateInv (cadr *Layers)) ))
+
+(setq *DeltaH
+   (mDot (mT (caddr *Layers)) *dE_dH) )
+
+(setq *DeltaBH
+   (mSumCol *dE_dH)) 
+
+(setq *Weights (mapcar m+ *Weights (list *DeltaH  *DeltaO )))
+(setq *Biases  (m+ *Biases  (list *DeltaBH *DeltaBO)))
