@@ -95,28 +95,34 @@
 
 # Loop begins here
 
-(setq *Layers (list *Inputs))
-
-(mapcar
-   '((W B)
-      (setq *Layers
-        (append *Layers
-            (list (mActivate
-               (addBias (mDot (last *Layers) W) B)))))) 
-   *Weights
-   *Biases)
-
-# Feed forwarding done
 (do 1
 
+	(setq *Layers (list *Inputs))
+
+	(mapcar
+	   '((W B)
+		  (setq *Layers
+			(append
+				(list (mActivate
+				   (addBias (mDot (car *Layers) W) B)))
+				*Layers))) 
+	   *Weights
+	   *Biases)
+
+   # Feed forwarding done
+
    (setq *Diff
-      (m- *Output (last *Layers)) )
+      (m- *Output (car *Layers)) )
 
    (setq *Error
       (mmap '((X) (pow X 2.0)) *Diff))
 
-   (setq *dE_dL # The learning rate is applied once, i'll do it here
-      (m* *Diff (m*N (mActivateInv (last *Layers)) *LR)) )
+   (setq *dE_dL 
+      (m* 
+		*Diff
+		(m*N (mActivateInv
+				(car *Layers)) *LR)) )
+
 # Good until here
    (setq *DeltaO
       (mDot (mT (cadr *Layers)) *dE_dL) )
