@@ -81,6 +81,9 @@
 
 (setq *Network '(2 2 1))
 
+(setq *LR 0.1) # Learning Rate
+
+# End of user inputs
 (setq *Weights (make
    (mapcar '((B A) (link (mRand A B)))
       (cdr *Network) *Network) ))
@@ -90,56 +93,56 @@
       (link (make (do I
         (link (- (rand 0 2.0) 1.0]
 
+# Loop begins here
+
 (setq *Layers (list *Inputs))
 
 (mapcar
    '((W B)
       (setq *Layers
-        (append (list (mActivate
-          (addBias
-             (mDot (car *Layers) W)
-              B)))
-         *Layers))) 
+        (append *Layers
+            (list (mActivate
+               (addBias (mDot (last *Layers) W) B)))))) 
    *Weights
    *Biases)
 
 # Feed forwarding done
+(do 1
 
-(setq *LR 0.1) # Learning Rate
+   (setq *Diff
+      (m- *Output (last *Layers)) )
 
-(setq *Diff
-   (m- *Output (car *Layers)) )
+   (setq *Error
+      (mmap '((X) (pow X 2.0)) *Diff))
 
-(setq *Error
-   (mmap '((X) (pow X 2.0)) *Diff))
+   (setq *dE_dL # The learning rate is applied once, i'll do it here
+      (m* *Diff (m*N (mActivateInv (last *Layers)) *LR)) )
+# Good until here
+   (setq *DeltaO
+      (mDot (mT (cadr *Layers)) *dE_dL) )
 
-(setq *dE_dL # The learning rate is applied once, i'll do it here
-   (m* *Diff (m*N (mActivateInv (car *Layers)) *LR)) )
+   (setq *DeltaBO
+      (mSumCol *dE_dL)) 
 
-(setq *DeltaO
-   (mDot (mT (cadr *Layers)) *dE_dL) )
+   (setq *ErrorH
+      (mDot
+         *dE_dL
+         (mT (cadr *Weights)) ))
 
-(setq *DeltaBO
-   (mSumCol *dE_dL)) 
+   (setq *dE_dH
+      (m*
+         *ErrorH
+         (mActivateInv (cadr *Layers)) ))
 
-(setq *ErrorH
-   (mDot
-      *dE_dL
-      (mT (cadr *Weights)) ))
+   (setq *DeltaH
+      (mDot (mT (caddr *Layers)) *dE_dH) )
 
-(setq *dE_dH
-   (m*
-      *ErrorH
-      (mActivateInv (cadr *Layers)) ))
+   (setq *DeltaBH
+      (mSumCol *dE_dH)) 
 
-(setq *DeltaH
-   (mDot (mT (caddr *Layers)) *dE_dH) )
-
-(setq *DeltaBH
-   (mSumCol *dE_dH)) 
-
-(setq *Weights (mapcar m+ *Weights (list *DeltaH  *DeltaO )))
-(setq *Biases  (m+ *Biases  (list *DeltaBH *DeltaBO)))
+   (setq *Weights (mapcar m+ *Weights (list *DeltaH  *DeltaO )))
+   (setq *Biases  (m+ *Biases  (list *DeltaBH *DeltaBO)))
+)
 
 (prinl "Weights")
 (mapcar mPrint *Weights)
