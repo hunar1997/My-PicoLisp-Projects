@@ -31,7 +31,6 @@
 
 (de m+ (A B)
    (mmap + A B))
-
 (de m- (A B)
    (mmap - A B))
 
@@ -44,7 +43,7 @@
    (prinl)
    (for I M
       (prin "   ")
-      (for J (mapcar round I)
+      (for J (mapcar '((N) (align 6 (round N))) I)
          (prin J " "))
      (prinl)))
 
@@ -81,6 +80,9 @@
 
 (setq *Network '(2 2 1))
 
+(setq *LR 0.1) # Learning Rate
+
+# End of user inputs
 (setq *Weights (make
    (mapcar '((B A) (link (mRand A B)))
       (cdr *Network) *Network) ))
@@ -90,58 +92,69 @@
       (link (make (do I
         (link (- (rand 0 2.0) 1.0]
 
-(setq *Layers (list *Inputs))
+# Loop begins here
 
-(mapcar
-   '((W B)
-      (setq *Layers
-        (append (list (mActivate
-          (addBias
-             (mDot (car *Layers) W)
-              B)))
-         *Layers))) 
-   *Weights
-   *Biases)
+(for I 100000
 
-# Feed forwarding done
+   (setq *Layers (list *Inputs))
 
-(setq *LR 0.1) # Learning Rate
+   (mapcar
+      '((W B)
+         (setq *Layers
+         (append
+            (list (mActivate
+               (addBias (mDot (car *Layers) W) B)))
+            *Layers))) 
+      *Weights
+      *Biases)
 
-(setq *Diff
-   (m- *Output (car *Layers)) )
+   # Feed forwarding done
 
-(setq *Error
-   (mmap '((X) (pow X 2.0)) *Diff))
+   (setq *Diff
+      (m- *Output (car *Layers)) )
 
-(setq *dE_dL # The learning rate is applied once, i'll do it here
-   (m* *Diff (m*N (mActivateInv (car *Layers)) *LR)) )
+   (setq *Error
+      (mmap '((X) (pow X 2.0)) *Diff))
+   (when (=0 (% I 1000)) 
+      (prinl "Error: " (format (car (mSumCol *Error)) *Scl)))
+   (T (< (car (mSumCol *Error)) 0.001))
 
-(setq *DeltaO
-   (mDot (mT (cadr *Layers)) *dE_dL) )
+   (setq *dE_dL 
+      (m* 
+      *Diff
+      (m*N (mActivateInv
+           (car *Layers)) *LR)) )
 
-(setq *DeltaBO
-   (mSumCol *dE_dL)) 
+   (mapcar
+      '((Layer Weight)
+         (push '*Delta 
+            (mDot (mT Layer) *dE_dL))
+         (push '*DeltaB
+            (mSumCol *dE_dL))
+         (setq *Error
+            (mDot
+               *dE_dL
+               (mT (cadr *Weights)) )) 
 
-(setq *ErrorH
-   (mDot
-      *dE_dL
-      (mT (cadr *Weights)) ))
+         (setq *dE_dL
+            (m*
+               *Error
+               (mActivateInv Layer) ))
+      )
+      (cdr *Layers) (reverse *Weights)
+   )
 
-(setq *dE_dH
-   (m*
-      *ErrorH
-      (mActivateInv (cadr *Layers)) ))
+   (setq *Weights (mapcar m+ *Weights *Delta))
+   (setq *Biases  (m+ *Biases  *DeltaB))
+)
 
-(setq *DeltaH
-   (mDot (mT (caddr *Layers)) *dE_dH) )
-
-(setq *DeltaBH
-   (mSumCol *dE_dH)) 
-
-(setq *Weights (mapcar m+ *Weights (list *DeltaH  *DeltaO )))
-(setq *Biases  (m+ *Biases  (list *DeltaBH *DeltaBO)))
-
-(prinl "Weights")
+(prinl "^JWeights:")
 (mapcar mPrint *Weights)
-(prinl "Biases")
+(prinl "^JBiases:")
 (mPrint *Biases)
+(prinl "^JOutput:^JExcepted   Result")
+(mapcar
+   '((A B)
+      (prinl (round (car A)) "      " (round (car B))))
+   *Output
+   (car *Layers))
