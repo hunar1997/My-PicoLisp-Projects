@@ -43,7 +43,8 @@
    (prinl)
    (for I M
       (prin "   ")
-      (for J (mapcar '((N) (align 6 (round N))) I)
+      (for J
+         (mapcar '((N) (align 6 (round N))) I)
          (prin J " "))
      (prinl)))
 
@@ -69,9 +70,9 @@
    (mapcar '((I) (mapcar + I B)) M) )
 
 (setq *Inputs '((0.0 0.0)
-               (0.0 1.0)
-               (1.0 0.0)
-               (1.0 1.0)) )
+                (0.0 1.0)
+                (1.0 0.0)
+                (1.0 1.0)) )
 
 (setq *Output '((0.0)
                 (1.0)
@@ -98,7 +99,7 @@
 
    (setq *Layers (list *Inputs))
 
-   (mapcar
+   (mapc
       '((W B)
          (setq *Layers
          (append
@@ -117,7 +118,7 @@
       (mmap '((X) (pow X 2.0)) *Diff))
    (when (=0 (% I 1000)) 
       (prinl "Error: " (format (car (mSumCol *Error)) *Scl)))
-   (T (< (car (mSumCol *Error)) 0.001))
+   (T (< (car (mSumCol *Error)) 0.0001))
 
    (setq *dE_dL 
       (m* 
@@ -125,7 +126,7 @@
       (m*N (mActivateInv
            (car *Layers)) *LR)) )
 
-   (mapcar
+   (mapc
       '((Layer Weight)
          (push '*Delta 
             (mDot (mT Layer) *dE_dL))
@@ -146,14 +147,15 @@
 
    (setq *Weights (mapcar m+ *Weights *Delta))
    (setq *Biases  (m+ *Biases  *DeltaB))
+   (off *Delta *DeltaB) # reset, better use let
 )
 
 (prinl "^JWeights:")
-(mapcar mPrint *Weights)
+(mapc mPrint *Weights)
 (prinl "^JBiases:")
 (mPrint *Biases)
 (prinl "^JOutput:^JExcepted   Result")
-(mapcar
+(mapc
    '((A B)
       (prinl (round (car A)) "      " (round (car B))))
    *Output
