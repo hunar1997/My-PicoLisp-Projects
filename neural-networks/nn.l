@@ -50,17 +50,20 @@
          (prin J " "))
      (prinl)))
 
-(de sig (N)
-   (*/ 1. 1. (+ 1. (exp (- N)))) )
+(de sig (N Inv) # Inv=T means give me the inverse
+   (ifn Inv
+      (*/ 1. 1. (+ 1. (exp (- N))))
+      (*/ N (- 1. N) 1.)) ) # This is wrong, it shouldn't assume we have N=S(X)
 
-(de sigInv (N)
-   (*/ N (- 1. N) 1.))
+(de relu (N Inv) (ifn Inv
+      (max N 0)
+      (if (ge0 N) 1 0)))
 
 (de mActivate (M)
    (mmap sig M))
 
 (de mActivateInv (M)
-   (mmap sigInv M))
+   (mmap '((X) (sig X T)) M))
 
 (de addBias (M B)
    (mapcar '((I) (mapcar + I B)) M) )
@@ -79,6 +82,46 @@
 
 (setq *LR 0.01) # Learning Rate
 
+
+(class +NN)
+
+(dm T @
+   (=: lr 0.01)
+   (=: act 'sig)
+   # Read user input
+   (while (args)
+      (put This (next) (next)))
+   (unless (: shape) (prinl "Error: you must give shape. ex. 'shape (2 2 1)"))
+
+   (=: weights (make
+      (mapcar '((B A) (link (mRand A B)))
+         (cdr (: shape)) (: shape)) ))
+
+   (=: biases (make
+      (for I (cdr (: shape))
+         (link (make (do I
+           (link (- (rand 0 2.0) 1.0]
+
+(dm feedForward> (Inputs)
+   (=: layers (list Inputs))
+
+   (mapc
+      '((W B)
+         (=: layers
+         (append
+            (list (mActivate
+               (addBias (mDot (car (: layers)) W) B)))
+            (: layers)))) 
+      (: weights)
+      (: biases))
+   (car (: layers))
+)
+
+(setq M (new '(+NN) 'shape (2 2 1)))
+
+(feedForward> M *Inputs)
+
+
 # End of user inputs
 (setq *Weights (make
    (mapcar '((B A) (link (mRand A B)))
@@ -91,7 +134,7 @@
 
 # Loop begins here
 
-(for I 10000000
+(for I 10
 
    (setq *Layers (list *Inputs))
 
