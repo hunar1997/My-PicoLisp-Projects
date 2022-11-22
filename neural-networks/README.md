@@ -2,4 +2,4 @@
 
 This library provides an easy to use way for creating a model and training it using backpropagation
 
-Currently working but needs cleaning
+Currently working, it contains one example solving the XOR problem.
