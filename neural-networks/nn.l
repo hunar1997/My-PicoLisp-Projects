@@ -50,9 +50,11 @@
          (prin J " "))
      (prinl)))
 
-(de sig (N Inv) # sigmoid vfunction, Inv=T returns the inverse
+(de sig (N Inv) # sigmoid function, Inv=T returns the inverse
    (ifn Inv
-      (*/ 1. 1. (+ 1. (exp (- N))))
+      (cond ((> N 10.)  1.)
+            ((< N -10.) 0 )
+            (T (*/ 1. 1. (+ 1. (exp (- N))))) )
       (*/ N (- 1. N) 1.)) ) # CAREFUL: N here is S(N) so if your inverse is not in terms of S(N) it wouldn't work
 
 (de mActivate (M)
@@ -76,7 +78,7 @@
    # Read user input
    (while (args)
       (put This (next) (next)))
-   (unless (: shape) (prinl "Error: you must give shape. ex. 'shape (2 2 1)"))
+   (unless (: shape) (msg "Error: you must give shape. ex. 'shape (2 2 1)"))
 
    (=: weights (make
       (mapcar '((B A) (link (mRand A B)))
@@ -127,7 +129,6 @@
    
    (let I 1 (loop
       (feedForward> This Inputs)
-
       (T (let (Diff   (m- Goal (car (: layers)))
                Error  (mmap '((X) (pow X 2.0)) Diff)
                Delta  NIL
@@ -141,11 +142,12 @@
          (updateWeights> This dE_dL)
 
          (when (=0 (% I (: every))) 
-            (prinl "Error: " (format OutError *Scl)))
+            (prinl "Error: " (format OutError *Scl)
+                   "     Accuracy: " (round (max 0 (*/ 100. (- 1. OutError) 1.)) 2) "%"))
          (inc 'I)
          (if (: forever) (< OutError (: stop)) (> I Iterations) ))))))
 
-(dm results> ()
+(dm resultss> ()
    (prinl "^JWeights:")
    (mapc mPrint (: weights))
    (prinl "^JBiases:")
@@ -156,3 +158,9 @@
          (prinl (round (car A)) "      " (round (car B))))
       *Outputs
       (car (: layers))))
+
+
+(dm results> ()
+   (prin "Result:") (mPrint (car (: layers)))
+   (prin "Goal:")   (mPrint *Outputs) )
+
